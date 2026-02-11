@@ -1173,4 +1173,13 @@
   });
 </script>
 </body>
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(function(){
+      if (typeof map !== "undefined") {
+        map.invalidateSize();
+      }
+    }, 500);
+  });
+</script>
 </html>
