@@ -1,0 +1,1176 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dil Bariyeri ve İlköğretim | Proje Web Sitesi</title>
+  <meta name="description" content="İlköğretim çağındaki çocuklarda dil bariyerine bağlı güçlükleri inceleyen araştırma projesi web sitesi." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet (Map) CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root{
+      --bg: #050A0E;
+      --bg-secondary: #0A1219;
+      --text: #F0F4F8;
+      --text-secondary: #B8C5D6;
+      --muted: #8B9AAD;
+      --border: rgba(255,255,255,.06);
+      --border-strong: rgba(255,255,255,.12);
+      --accent-primary: #4F9FFF;
+      --accent-secondary: #7C3AED;
+      --accent-tertiary: #F472B6;
+      --glow-primary: rgba(79, 159, 255, 0.15);
+      --glow-secondary: rgba(124, 58, 237, 0.15);
+      --shadow-soft: 0 4px 24px rgba(0,0,0,.3);
+      --shadow-strong: 0 8px 40px rgba(0,0,0,.5);
+      --shadow-glow: 0 0 40px var(--glow-primary);
+      --radius: 24px;
+      --radius-sm: 16px;
+      --max: 1200px;
+      --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(circle at 20% 30%, var(--glow-primary), transparent 25%),
+        radial-gradient(circle at 80% 20%, var(--glow-secondary), transparent 25%),
+        radial-gradient(circle at 60% 80%, rgba(244, 114, 182, 0.08), transparent 30%);
+      animation: bgFloat 20s ease-in-out infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(5%, -5%) rotate(1deg); }
+      66% { transform: translate(-3%, 3%) rotate(-1deg); }
+    }
+    
+    a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    
+    a:hover {
+      color: var(--accent-secondary);
+      text-decoration: underline;
+    }
+    
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 32px 24px 100px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Header with glassmorphism */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(10, 18, 25, 0.8);
+      border-bottom: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-soft);
+      animation: slideDown 0.6s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .topbar {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    
+    .brand:hover {
+      transform: translateY(-2px);
+    }
+    
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      box-shadow: var(--shadow-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .logo::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: translateX(-100%);
+      animation: logoShine 3s ease-in-out infinite;
+    }
+    
+    @keyframes logoShine {
+      0%, 100% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+    }
+    
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .brand b {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    
+    .brand span {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .navlink {
+      padding: 10px 18px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      position: relative;
+    }
+    
+    .navlink::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      opacity: 0;
+      transition: var(--transition);
+      z-index: -1;
+    }
+    
+    .navlink:hover {
+      color: var(--text);
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    
+    .navlink:hover::before {
+      opacity: 0.1;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .pill {
+      border: 1px solid var(--border-strong);
+      background: rgba(79, 159, 255, 0.1);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .pill::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .pill:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(79, 159, 255, 0.3);
+    }
+    
+    .pill:hover::before {
+      opacity: 1;
+    }
+    
+    .pill span {
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Hero Section */
+    .hero {
+      padding: 48px 0 24px;
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 32px;
+      align-items: start;
+      animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      nav { display: none; }
+    }
+    
+    .card {
+      background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    }
+    
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-strong), 0 0 30px rgba(79, 159, 255, 0.1);
+    }
+    
+    .card-inner {
+      padding: 32px;
+    }
+    
+    h1 {
+      margin: 0 0 16px;
+      font-family: 'DM Serif Display', serif;
+      font-size: 52px;
+      font-weight: 400;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--text), var(--text-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 0.8s ease-out 0.3s backwards;
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      margin: 0 0 24px;
+      font-size: 18px;
+      line-height: 1.6;
+      animation: fadeInUp 0.8s ease-out 0.4s backwards;
+    }
+    
+    .chips {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      animation: fadeInUp 0.8s ease-out 0.5s backwards;
+    }
+    
+    .chip {
+      font-size: 13px;
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: rgba(79, 159, 255, 0.05);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    
+    .chip:hover {
+      background: rgba(79, 159, 255, 0.15);
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+    }
+    
+    .cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+      animation: fadeInUp 0.8s ease-out 0.6s backwards;
+    }
+    
+    .btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding: 14px 24px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    
+    .btn.primary {
+      border-color: var(--accent-primary);
+      background: linear-gradient(135deg, rgba(79, 159, 255, 0.2), rgba(124, 58, 237, 0.2));
+      box-shadow: 0 4px 16px rgba(79, 159, 255, 0.2);
+    }
+    
+    .btn.primary:hover {
+      box-shadow: 0 8px 32px rgba(79, 159, 255, 0.4);
+      border-color: var(--accent-secondary);
+    }
+    
+    .btn span {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .statgrid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat {
+      background: linear-gradient(135deg, rgba(79, 159, 255, 0.05), rgba(124, 58, 237, 0.05));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(79, 159, 255, 0.1), transparent 70%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .stat:hover::before {
+      opacity: 1;
+    }
+    
+    .stat:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 24px rgba(79, 159, 255, 0.2);
+    }
+    
+    .stat b {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+    
+    .stat small {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    section {
+      margin-top: 32px;
+      animation: fadeInUp 0.8s ease-out backwards;
+    }
+    
+    section:nth-child(2) { animation-delay: 0.1s; }
+    section:nth-child(3) { animation-delay: 0.2s; }
+    section:nth-child(4) { animation-delay: 0.3s; }
+    
+    .grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    
+    h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    
+    p {
+      margin: 0 0 14px;
+      color: var(--text-secondary);
+    }
+    
+    ul {
+      margin: 0;
+      padding-left: 24px;
+      color: var(--text-secondary);
+    }
+    
+    ul li {
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+    
+    .muted {
+      color: var(--muted);
+    }
+    
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 20px 0;
+    }
+    
+    .badge {
+      font-size: 12px;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 12px;
+      display: inline-block;
+      font-weight: 500;
+      background: rgba(79, 159, 255, 0.05);
+    }
+    
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+    
+    .titem {
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(79, 159, 255, 0.03), rgba(124, 58, 237, 0.03));
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .titem::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+      transform: scaleY(0);
+      transition: var(--transition);
+    }
+    
+    .titem:hover {
+      border-color: var(--accent-primary);
+      transform: translateX(8px);
+      box-shadow: 0 4px 16px rgba(79, 159, 255, 0.15);
+    }
+    
+    .titem:hover::before {
+      transform: scaleY(1);
+    }
+    
+    .titem b {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .titem span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .team {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    @media (max-width: 900px) {
+      .team { grid-template-columns: 1fr; }
+    }
+    
+    .person {
+      padding: 24px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(79, 159, 255, 0.03), rgba(124, 58, 237, 0.03));
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .person::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .person:hover::before {
+      opacity: 1;
+    }
+    
+    .person:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 24px rgba(79, 159, 255, 0.15);
+    }
+    
+    .person b {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    
+    .person small {
+      color: var(--muted);
+      font-size: 13px;
+      display: block;
+      margin-bottom: 12px;
+    }
+    
+    .person .muted {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    form {
+      display: grid;
+      gap: 16px;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+      font-size: 15px;
+      transition: var(--transition);
+    }
+    
+    input:focus, textarea:focus {
+      border-color: var(--accent-primary);
+      background: rgba(79, 159, 255, 0.05);
+      box-shadow: 0 0 0 3px rgba(79, 159, 255, 0.1);
+    }
+    
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+    
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 32px;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, rgba(79, 159, 255, 0.95), rgba(124, 58, 237, 0.95));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 16px 24px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-strong);
+      display: none;
+      max-width: 92vw;
+      color: white;
+      font-weight: 600;
+      animation: toastIn 0.4s ease-out;
+    }
+    
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    
+    footer {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 14px;
+    }
+    
+    .kbd {
+      font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Source Code Pro', monospace;
+      font-size: 13px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-bottom-color: var(--border-strong);
+      border-radius: 8px;
+      background: rgba(79, 159, 255, 0.05);
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    
+    /* Map container */
+    #mapTR {
+      height: 480px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      transition: var(--transition);
+    }
+    
+    #mapTR:hover {
+      box-shadow: var(--shadow-strong);
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, var(--accent-secondary), var(--accent-tertiary));
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="topbar">
+    <a href="#" class="brand">
+      <div class="logo">📚</div>
+      <div class="brand-text">
+        <b id="t_brand">Dil Bariyeri Projesi</b>
+        <span id="t_brand_sub">İlköğretimde Dil Bariyeri Araştırması</span>
+      </div>
+    </a>
+    <nav>
+      <a href="#about" class="navlink" id="t_nav1">Proje</a>
+      <a href="#methods" class="navlink" id="t_nav2">Yöntem</a>
+      <a href="#timeline" class="navlink" id="t_nav3">Takvim</a>
+      <a href="#team" class="navlink" id="t_nav4">Ekip</a>
+      <a href="#contact" class="navlink" id="t_nav5">İletişim</a>
+    </nav>
+    <div class="actions">
+      <a href="#contact" class="pill"><span id="t_contact_btn">İletişime Geç</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="hero">
+    <div class="card">
+      <div class="card-inner">
+        <h1 id="t_hero_title">İlköğretim Çağındaki Çocuklarda Dil Bariyeri</h1>
+        <p class="subtitle" id="t_hero_sub">
+          Ana dili Türkçe olmayan ilköğretim öğrencilerinin karşılaştığı dil bariyerlerini,
+          bu bariyerlerin akademik başarı, sosyal entegrasyon ve psikososyal uyum üzerindeki etkilerini
+          inceleyen kapsamlı bir araştırma projesi.
+        </p>
+        <div class="chips">
+          <span class="chip" id="c1">Eğitim Bilimi</span>
+          <span class="chip" id="c2">Dilbilim</span>
+          <span class="chip" id="c3">Çocuk Gelişimi</span>
+          <span class="chip" id="c4">Sosyal Entegrasyon</span>
+        </div>
+        <div class="cta">
+          <a href="#about" class="btn primary"><span id="b1">📖 Detaylı Bilgi</span></a>
+          <a href="#methods" class="btn"><span id="b2">🔬 Yöntem</span></a>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-inner">
+          <h2 id="t_stat_title">Proje Bilgileri</h2>
+          <div class="statgrid">
+            <div class="stat">
+              <b id="stat1">12</b>
+              <small id="stat1s">Ay</small>
+            </div>
+            <div class="stat">
+              <b id="stat2">300+</b>
+              <small id="stat2s">Katılımcı</small>
+            </div>
+            <div class="stat">
+              <b id="stat3">5</b>
+              <small id="stat3s">İl</small>
+            </div>
+            <div class="stat">
+              <b id="stat4">15</b>
+              <small id="stat4s">Okul</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="about">
+    <div class="card">
+      <div class="card-inner">
+        <h2 id="t_about_title">Proje Özeti</h2>
+        <p id="t_about_p1">
+          Bu proje, ana dili Türkçe olmayan ilköğretim öğrencilerinin eğitim sürecinde karşılaştıkları
+          dil bariyerlerini çok boyutlu bir yaklaşımla incelemeyi hedeflemektedir. Araştırma, nicel ve
+          nitel yöntemleri bir araya getirerek dil bariyerinin akademik, sosyal ve psikolojik boyutlarını
+          derinlemesine analiz edecektir.
+        </p>
+        <p id="t_about_p2">
+          Proje kapsamında, öğrencilerin dil gelişim düzeyleri, akademik başarıları, sosyal entegrasyon
+          seviyeleri ve psikososyal uyum göstergeleri sistematik olarak ölçülecek ve değerlendirilecektir.
+          Elde edilen bulgular, eğitim politikalarına ve uygulamalarına yönelik somut öneriler sunacaktır.
+        </p>
+        <div class="divider"></div>
+        <h2 id="t_obj_title">Araştırma Hedefleri</h2>
+        <ul>
+          <li id="obj1">Ana dili Türkçe olmayan öğrencilerin dil bariyerlerini sistematik olarak belgelemek</li>
+          <li id="obj2">Dil bariyerinin akademik başarı ve sosyal entegrasyon üzerindeki etkilerini ölçmek</li>
+          <li id="obj3">Psikososyal uyum ve okul bağlılığı arasındaki ilişkileri analiz etmek</li>
+          <li id="obj4">Öğretmenlerin ve velilerin deneyimlerini nitel yöntemlerle keşfetmek</li>
+          <li id="obj5">Kanıta dayalı eğitim politika önerileri geliştirmek</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="methods">
+    <div class="grid">
+      <div class="card"><div class="card-inner">
+        <h2 id="t_m1_title">🎯 Nicel Araştırma</h2>
+        <p class="muted" id="t_m1_p">Standartlaştırılmış ölçüm araçları ile veri toplama.</p>
+        <div class="divider"></div>
+        <ul>
+          <li id="m11">Dil yeterlilik testleri (Türkçe)</li>
+          <li id="m12">Akademik başarı kayıtları</li>
+          <li id="m13">Sosyal entegrasyon ölçekleri</li>
+          <li id="m14">Psikososyal uyum anketleri</li>
+          <li id="m15">İstatistiksel analiz (regresyon, ANOVA)</li>
+        </ul>
+      </div></div>
+
+      <div class="card"><div class="card-inner">
+        <h2 id="t_m2_title">💬 Nitel Araştırma</h2>
+        <p class="muted" id="t_m2_p">Derinlemesine görüşmeler ve gözlemler.</p>
+        <div class="divider"></div>
+        <ul>
+          <li id="m21">Yarı yapılandırılmış öğretmen görüşmeleri</li>
+          <li id="m22">Veli odak grup tartışmaları</li>
+          <li id="m23">Sınıf içi gözlemler (etnografik)</li>
+          <li id="m24">Öğrenci anlatıları (narrative inquiry)</li>
+          <li id="m25">Tematik içerik analizi</li>
+        </ul>
+      </div></div>
+
+      <div class="card"><div class="card-inner">
+        <h2 id="t_m3_title">📊 Karma Yöntem</h2>
+        <p class="muted" id="t_m3_p">Nicel ve nitel verilerin entegrasyonu.</p>
+        <div class="divider"></div>
+        <ul>
+          <li id="m31">Triangulation (çapraz doğrulama)</li>
+          <li id="m32">Açıklayıcı sıralı tasarım</li>
+          <li id="m33">Vaka çalışmaları (mixed-case)</li>
+          <li id="m34">Çoklu veri kaynağı analizi</li>
+          <li id="m35">Meta-inference (üst-çıkarım)</li>
+        </ul>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="card">
+      <div class="card-inner">
+        <h2 id="t_tl_title">Proje Takvimi</h2>
+        <p class="muted" id="t_tl_p">12 aylık araştırma süreci beş temel faza ayrılmıştır.</p>
+        <div class="timeline">
+          <div class="titem"><b id="t_tl1">Faz 1 — Tasarım & Etik Onay</b><span id="t_tl1s">Ay 1–2</span></div>
+          <div class="titem"><b id="t_tl2">Faz 2 — Pilot Uygulama</b><span id="t_tl2s">Ay 3</span></div>
+          <div class="titem"><b id="t_tl3">Faz 3 — Saha Veri Toplama</b><span id="t_tl3s">Ay 4–7</span></div>
+          <div class="titem"><b id="t_tl4">Faz 4 — Analiz & Geri Bildirim</b><span id="t_tl4s">Ay 8–10</span></div>
+          <div class="titem"><b id="t_tl5">Faz 5 — Raporlama & Yaygınlaştırma</b><span id="t_tl5s">Ay 11–12</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP SECTION -->
+  <section id="map">
+    <div class="card">
+      <div class="card-inner">
+        <h2 id="t_map_title">🗺️ Proje Sahaları</h2>
+        <p class="muted" id="t_map_p">Araştırma, Türkiye'nin farklı bölgelerindeki pilot okullarda gerçekleştirilecektir.</p>
+        <div id="mapTR"></div>
+        <p class="muted" style="font-size:13px; margin-top:14px;" id="t_map_note">
+          <strong>Not:</strong> Bu harita OpenStreetMap tabanlıdır. Noktalara tıklayarak saha detaylarını görebilirsiniz.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="team">
+    <div class="card">
+      <div class="card-inner">
+        <h2 id="t_team_title">👥 Araştırma Ekibi</h2>
+        <p class="muted" id="t_team_p">Disiplinler arası uzmanlık ile güçlü bir araştırma kadrosu.</p>
+        <div class="team">
+          <div class="person">
+            <b id="t_p1">Proje Yürütücüsü</b>
+            <small id="t_p1s">Dr. Ad Soyad • Üniversite Adı • email@ornek.com</small>
+            <div class="divider"></div>
+            <span class="muted" id="t_p1d">Proje koordinasyonu, araştırma tasarımı, metodoloji geliştirme ve genel analiz planlaması.</span>
+          </div>
+          <div class="person">
+            <b id="t_p2">Saha Araştırmacısı</b>
+            <small id="t_p2s">Dr. Ad Soyad • Kurum Adı</small>
+            <div class="divider"></div>
+            <span class="muted" id="t_p2d">Saha koordinasyonu, okul paydaşları ile iletişim, nitel veri toplama ve görüşme yönetimi.</span>
+          </div>
+          <div class="person">
+            <b id="t_p3">Bilimsel Danışman</b>
+            <small id="t_p3s">Prof. Dr. Ad Soyad • Üniversite</small>
+            <div class="divider"></div>
+            <span class="muted" id="t_p3d">Çocuk gelişimi, dil edinimi ve ölçme-değerlendirme konularında bilimsel danışmanlık.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ethics">
+    <div class="grid">
+      <div class="card"><div class="card-inner">
+        <h2 id="t_eth_title">🛡️ Etik İlkeler</h2>
+        <p class="muted" id="t_eth_p">
+          Tüm araştırma süreçleri etik kurallara ve Helsinki Bildirgesi'ne uygun olarak yürütülecektir.
+        </p>
+        <ul>
+          <li id="t_e1">Veli onamı ve çocuk rızası (assent) alınması</li>
+          <li id="t_e2">Gönüllülük ilkesi ve ayrılma hakkı</li>
+          <li id="t_e3">Kişisel verilerin korunması ve anonimleştirme</li>
+          <li id="t_e4">Katılımcılar üzerinde baskı yaratmama</li>
+        </ul>
+      </div></div>
+
+      <div class="card"><div class="card-inner">
+        <h2 id="t_faq_title">❓ Sık Sorulan Sorular</h2>
+        <p class="muted" id="t_faq1"><b>Çocuğumun notları etkilenir mi?</b><br/>Hayır. Çalışma tamamen araştırma amaçlıdır ve notlandırmadan bağımsızdır.</p>
+        <p class="muted" id="t_faq2"><b>Veriler kimlerle paylaşılacak?</b><br/>Kişisel veriler asla paylaşılmaz; yalnızca anonim bulgular bilimsel raporlarda yer alır.</p>
+        <p class="muted" id="t_faq3"><b>Katılım süresi ne kadar?</b><br/>Anketler 15–20 dakika, opsiyonel görüşmeler 20–30 dakika sürebilir.</p>
+      </div></div>
+
+      <div class="card"><div class="card-inner">
+        <h2 id="t_docs_title">📄 Dokümanlar</h2>
+        <p class="muted" id="t_docs_p">İlgili formlar ve bilgilendirme dokümanları.</p>
+        <ul>
+          <li><a href="#" onclick="toast('Örnek bağlantı — PDF yükleyebilirsiniz.'); return false;" id="t_doc1">📋 Veli Bilgilendirme Formu</a></li>
+          <li><a href="#" onclick="toast('Örnek bağlantı — PDF yükleyebilirsiniz.'); return false;" id="t_doc2">👶 Çocuk Bilgilendirme Metni</a></li>
+          <li><a href="#" onclick="toast('Örnek bağlantı — PDF yükleyebilirsiniz.'); return false;" id="t_doc3">🔒 Veri Koruma Özeti</a></li>
+        </ul>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="grid">
+      <div class="card"><div class="card-inner">
+        <h2 id="t_contact_title">📧 İletişim</h2>
+        <p class="muted" id="t_contact_p">
+          Sorularınız için bizimle iletişime geçebilirsiniz. (Bu form demo amaçlıdır)
+        </p>
+
+        <form id="contactForm">
+          <input id="name" name="name" placeholder="Ad Soyad" required />
+          <input id="email" name="email" placeholder="E-posta" type="email" required />
+          <textarea id="message" name="message" placeholder="Mesajınız" required></textarea>
+          <button class="btn primary" type="submit" id="t_send"><span>✉️ Gönder</span></button>
+          <span class="muted" style="font-size:12px" id="t_privacy_note">
+            Not: Bu demo formdur. Gerçek gönderim için backend entegrasyonu gereklidir.
+          </span>
+        </form>
+      </div></div>
+
+      <div class="card"><div class="card-inner">
+        <h2 id="t_links_title">🔗 Hızlı Erişim</h2>
+        <ul>
+          <li><a href="#about" id="t_l1">📖 Proje Özeti</a></li>
+          <li><a href="#methods" id="t_l2">🔬 Araştırma Yöntemi</a></li>
+          <li><a href="#map" id="t_lmap">🗺️ Proje Sahaları</a></li>
+          <li><a href="#ethics" id="t_l3">🛡️ Etik ve Bilgilendirme</a></li>
+        </ul>
+        <div class="divider"></div>
+        <p class="muted" id="t_hosting">
+          <strong>💡 İpucu:</strong> Bu siteyi GitHub Pages üzerinden ücretsiz yayınlayabilirsiniz.
+        </p>
+      </div></div>
+
+      <div class="card"><div class="card-inner">
+        <h2 id="t_note_title">📝 Geliştirme Notları</h2>
+        <p class="muted" id="t_note_p">
+          İstediğiniz zaman bütçe detayları, iş paketleri, risk analizi ve yaygınlaştırma planı gibi
+          ek bölümler ekleyebiliriz. Proje çağrısı formatına uyarlamak için destek sağlayabilirim.
+        </p>
+      </div></div>
+    </div>
+  </section>
+
+  <footer>
+    <div id="t_footer1">© <span id="year"></span> Dil Bariyeri ve İlköğretim Projesi • Araştırma Web Sitesi Şablonu</div>
+    <div style="margin-top: 8px;" id="t_footer2">Son güncelleme: <span class="kbd" id="lastUpdate">—</span></div>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // --- Toast notifications ---
+  const toastEl = document.getElementById('toast');
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.style.display = 'block';
+    clearTimeout(window.__t);
+    window.__t = setTimeout(() => toastEl.style.display = 'none', 3000);
+  }
+  
+  // --- Dynamic date updates ---
+  document.getElementById('year').textContent = new Date().getFullYear();
+  document.getElementById('lastUpdate').textContent = new Date().toISOString().slice(0, 10);
+
+  // --- Contact form handler (demo) ---
+  document.getElementById('contactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const message = document.getElementById('message').value.trim();
+    
+    if (!name || !email || !message) {
+      toast('⚠️ Lütfen tüm alanları doldurun.');
+      return;
+    }
+    
+    toast('✅ Mesajınız alındı! (Demo - gerçek gönderim için backend gerekir)');
+    e.target.reset();
+  });
+  
+  // --- Smooth scroll for navigation ---
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+<!-- Leaflet (Map) JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // --- Initialize Turkey Map ---
+  const map = L.map('mapTR', { 
+    scrollWheelZoom: false,
+    zoomControl: true
+  }).setView([39.0, 35.0], 6);
+
+  // OpenStreetMap tiles with attribution
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Excel'den (il/ilçe düzeyler) üretilen saha noktaları
+  const sites = [
+    { name: "Adana / Sarıçam", coords: [37.149710, 35.509490], level: "Yüksek", note: "Düzey: Yüksek • Ortalama puan: 73.38" },
+    { name: "Adana / Yüreğir", coords: [36.974390, 35.359160], level: "Yüksek", note: "Düzey: Yüksek • Ortalama puan: 76.10" },
+    { name: "Gaziantep / Şahinbey", coords: [37.037410, 37.378220], level: "Düşük", note: "Düzey: Düşük • Ortalama puan: 63.72" },
+    { name: "Hatay / Antakya", coords: [36.206550, 36.157220], level: "Düşük", note: "Düzey: Düşük • Ortalama puan: 62.78" },
+    { name: "Kahramanmaraş / Oniki Şubat", coords: [37.583000, 36.917000], level: "Orta", note: "Düzey: Orta • Ortalama puan: 72.95" },
+    { name: "Mardin / Merkez", coords: [37.312560, 40.734390], level: "Orta", note: "Düzey: Orta • Ortalama puan: 68.86" },
+    { name: "Şanlıurfa / Eyübiye", coords: [37.188000, 38.947000], level: "Düşük", note: "Düzey: Düşük • Ortalama puan: 62.31" },
+    { name: "Şanlıurfa / Haliliye", coords: [37.160223, 38.791811], level: "Orta", note: "Düzey: Orta • Ortalama puan: 68.26" }
+  ];
+
+  // Düzeye göre ikon rengi
+  const levelStyle = (level) => {
+    if (level === "Yüksek") return "linear-gradient(135deg, #ef4444, #f97316)";
+    if (level === "Orta")   return "linear-gradient(135deg, #f59e0b, #eab308)";
+    return "linear-gradient(135deg, #22c55e, #06b6d4)";
+  };
+
+  // Add markers with custom popups
+  sites.forEach(site => {
+    const customIcon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="background: ${levelStyle(site.level)}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.25);"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+    L.marker(site.coords, { icon: customIcon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family: 'Outfit', sans-serif; padding: 4px;">
+          <strong style="color: #4F9FFF; font-size: 14px;">${site.name}</strong><br/>
+          <span style="color: #8B9AAD; font-size: 12px;">${site.note}</span>
+        </div>
+      `);
+  });
+
+  sites.forEach(site => {
+    const customIcon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="background: ${levelStyle(site.level)}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.25);"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+
+    L.marker(site.coords, { icon: customIcon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family: 'Outfit', sans-serif; padding: 4px;">
+          <strong style="color:#F0F4F8; font-size: 14px;">${site.name}</strong><br/>
+          <span style="color:#B8C5D6; font-size: 12px;">${site.note}</span>
+        </div>
+      `);
+  });
+    
+    L.marker(site.coords, { icon: customIcon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family: 'Outfit', sans-serif; padding: 4px;">
+          <strong style="color: #4F9FFF; font-size: 14px;">${site.name}</strong><br/>
+          <span style="color: #8B9AAD; font-size: 12px;">${site.note}</span>
+        </div>
+      `);
+  });
+</script>
+</body>
+</html>
