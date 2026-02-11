@@ -1093,93 +1093,81 @@
 </script>
 
 <!-- Leaflet (Map) JS -->
+<!-- Leaflet (Map) JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-  // --- Initialize Turkey Map ---
-  const map = L.map('mapTR', { 
+  // 1) Haritayı oluştur
+  const map = L.map('mapTR', {
     scrollWheelZoom: false,
     zoomControl: true
   }).setView([39.0, 35.0], 6);
 
-  // OpenStreetMap tiles with attribution
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  // 2) Tile layer (OSM)
+  const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution: '&copy; OpenStreetMap contributors',
+    crossOrigin: true
   }).addTo(map);
 
-  // Excel'den (il/ilçe düzeyler) üretilen saha noktaları
+  // 3) Senin saha verilerin (il/ilçe + seviye)
   const sites = [
-    { name: "Adana / Sarıçam", coords: [37.149710, 35.509490], level: "Yüksek", note: "Düzey: Yüksek • Ortalama puan: 73.38" },
-    { name: "Adana / Yüreğir", coords: [36.974390, 35.359160], level: "Yüksek", note: "Düzey: Yüksek • Ortalama puan: 76.10" },
-    { name: "Gaziantep / Şahinbey", coords: [37.037410, 37.378220], level: "Düşük", note: "Düzey: Düşük • Ortalama puan: 63.72" },
-    { name: "Hatay / Antakya", coords: [36.206550, 36.157220], level: "Düşük", note: "Düzey: Düşük • Ortalama puan: 62.78" },
-    { name: "Kahramanmaraş / Oniki Şubat", coords: [37.583000, 36.917000], level: "Orta", note: "Düzey: Orta • Ortalama puan: 72.95" },
-    { name: "Mardin / Merkez", coords: [37.312560, 40.734390], level: "Orta", note: "Düzey: Orta • Ortalama puan: 68.86" },
-    { name: "Şanlıurfa / Eyübiye", coords: [37.188000, 38.947000], level: "Düşük", note: "Düzey: Düşük • Ortalama puan: 62.31" },
-    { name: "Şanlıurfa / Haliliye", coords: [37.160223, 38.791811], level: "Orta", note: "Düzey: Orta • Ortalama puan: 68.26" }
+    { name: "Adana / Sarıçam",      coords: [37.14971, 35.50949], level: "Yüksek" },
+    { name: "Adana / Yüreğir",      coords: [36.97439, 35.35916], level: "Yüksek" },
+    { name: "Gaziantep / Şahinbey", coords: [37.03741, 37.37822], level: "Düşük"  },
+    { name: "Hatay / Antakya",      coords: [36.20655, 36.15722], level: "Düşük"  },
+    { name: "Kahramanmaraş / Oniki Şubat", coords: [37.58300, 36.91700], level: "Orta"  },
+    { name: "Mardin / Merkez",      coords: [37.31256, 40.73439], level: "Orta"   },
+    { name: "Şanlıurfa / Eyübiye",  coords: [37.18800, 38.94700], level: "Düşük"  },
+    { name: "Şanlıurfa / Haliliye", coords: [37.160223, 38.791811], level: "Orta" }
   ];
 
-  // Düzeye göre ikon rengi
-  const levelStyle = (level) => {
-    if (level === "Yüksek") return "linear-gradient(135deg, #ef4444, #f97316)";
-    if (level === "Orta")   return "linear-gradient(135deg, #f59e0b, #eab308)";
-    return "linear-gradient(135deg, #22c55e, #06b6d4)";
-  };
+  // 4) Seviye → renk
+  function levelColor(level){
+    if(level === "Yüksek") return "#ef4444"; // kırmızı
+    if(level === "Orta")   return "#f59e0b"; // turuncu
+    return "#22c55e"; // düşük: yeşil
+  }
 
-  // Add markers with custom popups
-  sites.forEach(site => {
-    const customIcon = L.divIcon({
+  // 5) Marker’ları bas
+  sites.forEach(s => {
+    const icon = L.divIcon({
       className: 'custom-marker',
-      html: `<div style="background: ${levelStyle(site.level)}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.25);"></div>`,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12]
-    });
-    L.marker(site.coords, { icon: customIcon })
-      .addTo(map)
-      .bindPopup(`
-        <div style="font-family: 'Outfit', sans-serif; padding: 4px;">
-          <strong style="color: #4F9FFF; font-size: 14px;">${site.name}</strong><br/>
-          <span style="color: #8B9AAD; font-size: 12px;">${site.note}</span>
-        </div>
-      `);
-  });
-
-  sites.forEach(site => {
-    const customIcon = L.divIcon({
-      className: 'custom-marker',
-      html: `<div style="background: ${levelStyle(site.level)}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.25);"></div>`,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12]
+      html: `<div style="
+        background:${levelColor(s.level)};
+        width:22px;height:22px;border-radius:50%;
+        border:3px solid white;
+        box-shadow:0 4px 12px rgba(0,0,0,0.35);
+      "></div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11]
     });
 
-    L.marker(site.coords, { icon: customIcon })
+    L.marker(s.coords, { icon })
       .addTo(map)
-      .bindPopup(`
-        <div style="font-family: 'Outfit', sans-serif; padding: 4px;">
-          <strong style="color:#F0F4F8; font-size: 14px;">${site.name}</strong><br/>
-          <span style="color:#B8C5D6; font-size: 12px;">${site.note}</span>
-        </div>
-      `);
+      .bindPopup(`<b>${s.name}</b><br/>Dil bariyeri seviyesi: <b>${s.level}</b>`);
   });
-    
-    L.marker(site.coords, { icon: customIcon })
-      .addTo(map)
-      .bindPopup(`
-        <div style="font-family: 'Outfit', sans-serif; padding: 4px;">
-          <strong style="color: #4F9FFF; font-size: 14px;">${site.name}</strong><br/>
-          <span style="color: #8B9AAD; font-size: 12px;">${site.note}</span>
-        </div>
-      `);
-  });
-</script>
-</body>
-  <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(function(){
-      if (typeof map !== "undefined") {
-        map.invalidateSize();
-      }
-    }, 500);
-  });
+
+  // 6) KRİTİK: Harita ekrana girince boyutu düzelt (siyah ekranı bitirir)
+  function fixMap(){
+    map.invalidateSize(true);
+    // İsteğe bağlı: noktalar görünsün diye alanı otomatik ayarla
+    const group = L.featureGroup(sites.map(s => L.marker(s.coords)));
+    map.fitBounds(group.getBounds().pad(0.25));
+  }
+
+  // Harita alanı görünür olunca çalıştır
+  const mapEl = document.getElementById('mapTR');
+  const obs = new IntersectionObserver((entries) => {
+    if(entries[0].isIntersecting){
+      setTimeout(fixMap, 150);
+      obs.disconnect();
+    }
+  }, { threshold: 0.2 });
+
+  obs.observe(mapEl);
+
+  // Eğer kullanıcı direkt harita bölümüne linkle gelirse (bazı durumlar)
+  window.addEventListener('load', () => setTimeout(fixMap, 300));
 </script>
 </html>
